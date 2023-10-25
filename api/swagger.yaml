@@ -1,0 +1,56 @@
+swagger: "2.0"
+info:
+  description: "@project_name@ interface spec"
+  version: "1.0.0"
+  title: "@project_name@"
+  contact:
+    email: "apiteam@swagger.io"
+host: localhost:@service-port@
+basePath: "/"
+tags:
+- name: "root"
+  description: "service info and health check"
+- name: "example"
+  description: "example endpoint"
+schemes:
+- "https"
+- "http"
+paths:
+  /:
+    get:
+      tags:
+      - "root"
+      summary: "Get service info and health check, non 200 response means service not responding"
+      description: ""
+      operationId: "getInfo"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "service ok"
+  /v1/hello:
+    get:
+      tags:
+      - "example"
+      summary: "Example endpoint"
+      description: "Example endpoint that produces a respons"
+      operationId: "hello"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "name"
+          description: "example parameter"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              message: 
+                type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"

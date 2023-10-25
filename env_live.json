@@ -1,0 +1,22 @@
+{
+    "server": {
+        "port": @service-port@,
+        "log_requests": false,
+        "data_dog": {
+            "enabled": true,
+            "profiler": {
+              "enabled": false
+            },
+            "tracer": {
+              "enabled": true
+            }
+        }
+    },
+    "diagnostics": {
+        "log_level": "info",
+        "enable_pprof": false
+    },
+    "documentation":{
+        "enabled":false
+    }
+}

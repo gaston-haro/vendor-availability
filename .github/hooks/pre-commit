@@ -1,0 +1,66 @@
+#!/usr/bin/env python3.9
+import os
+import sys
+import subprocess
+import platform
+
+if sys.version_info < (3, 3):
+    from distutils.spawn import find_executable as which
+else:
+    from shutil import which
+
+os.environ.pop('__PYVENV_LAUNCHER__', None)
+
+# start templated
+if which('python3'):
+    INSTALL_PYTHON = which('python3')
+    print (platform.python_version())
+    print(os.environ['PATH'])
+    PYTHON = '3'
+elif which('pyhton'):
+    INSTALL_PYTHON = which('python')
+    print(os.environ['PATH'])
+    PYTHON = '2'
+else:
+    raise SystemExit('python not found')
+ARGS = ['hook-impl', '--config=.pre-commit-config.yaml', '--hook-type=pre-commit']
+# end templated
+
+ARGS.extend(('--hook-dir', os.path.realpath(os.path.dirname(__file__))))
+ARGS.append('--')
+ARGS.extend(sys.argv[1:])
+
+if not which('pre-commit'):
+    if PYTHON == '3':
+        CMD = ['pip3 install pre-commit']
+    else:
+        CMD = ['pip install pre-commit --user']
+    if sys.platform == 'win32':  # https://bugs.python.org/issue19124
+        import subprocess
+
+        if sys.version_info < (3, 7):  # https://bugs.python.org/issue25942
+            raise SystemExit(subprocess.Popen(CMD).wait())
+        else:
+            raise SystemExit(subprocess.call(CMD))
+    else:
+        print(CMD)
+        subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
+
+DNE = '`pre-commit` not found.  Did you forget to activate your virtualenv?'
+if os.access(INSTALL_PYTHON, os.X_OK):
+    CMD = [INSTALL_PYTHON, '-mpre_commit']
+elif which('pre-commit'):
+    CMD = ['pre-commit']
+else:
+    raise SystemExit(DNE)
+
+CMD.extend(ARGS)
+if sys.platform == 'win32':  # https://bugs.python.org/issue19124
+    import subprocess
+
+    if sys.version_info < (3, 7):  # https://bugs.python.org/issue25942
+        raise SystemExit(subprocess.Popen(CMD).wait())
+    else:
+        raise SystemExit(subprocess.call(CMD))
+else:
+    os.execvp(CMD[0], CMD)
