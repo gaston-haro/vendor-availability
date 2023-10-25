@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/pedidosya/@project_name@/engine"
 	"github.com/pedidosya/peya-go/logs"
 	"github.com/pedidosya/peya-go/server"
+	"github.com/pedidosya/vendor-availability/engine"
 )
 
 func handleHello(e engine.Spec, w http.ResponseWriter, r *http.Request) {

@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/pedidosya/@project_name@/models"
+	"github.com/pedidosya/vendor-availability/models"
 )
 
 // Engine implementation

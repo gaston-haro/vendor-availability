@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/pedidosya/@project_name@/models"
 	"github.com/pedidosya/peya-go/server"
+	"github.com/pedidosya/vendor-availability/models"
 	"github.com/stretchr/testify/assert"
 )
 

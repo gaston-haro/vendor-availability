@@ -1,6 +1,6 @@
 {
     "server": {
-        "port":@service-port@,
+        "port":8080,
         "log_requests": false,
         "data_dog": {
             "enabled":true,

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pedidosya/@project_name@/engine"
-	"github.com/pedidosya/@project_name@/models"
 	"github.com/pedidosya/peya-go/config"
 	"github.com/pedidosya/peya-go/logs"
 	"github.com/pedidosya/peya-go/server"
 	"github.com/pedidosya/peya-go/vault"
+	"github.com/pedidosya/vendor-availability/engine"
+	"github.com/pedidosya/vendor-availability/models"
 )
 
 func main() {
@@ -60,7 +60,7 @@ func readConfig(env string) (*models.Config, error) {
 	cfg.Env = env
 	cfg.Version = os.Getenv("VERSION")
 
-	vaultValues, err := vault.Read("https://vault.peya.co/v1/secret/@project_name@", env)
+	vaultValues, err := vault.Read("https://vault.peya.co/v1/secret/vendor-availability", env)
 	if err != nil {
 		panic(fmt.Sprintf("main: error from fault. no vault values found for env %s | %s", env, err.Error()))
 	}

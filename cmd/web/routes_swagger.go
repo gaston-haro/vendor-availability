@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/pedidosya/@project_name@/models"
 	"github.com/pedidosya/peya-go/logs"
 	"github.com/pedidosya/peya-go/server"
+	"github.com/pedidosya/vendor-availability/models"
 )
 
 // Associate route to expose swagger apidoc on non-productive endpoints
@@ -27,7 +27,8 @@ func addApidocRoutes(cfg *models.Config, s *server.Server) {
 				},
 				TimeOutSeconds: 0,
 			},
-			http.MethodGet)
+			http.MethodGet,
+		)
 
 		// Expose swagger compiled HTML view
 		s.Static("/api/", "api")
@@ -45,7 +46,8 @@ func addApidocRoutes(cfg *models.Config, s *server.Server) {
 				},
 				TimeOutSeconds: 0,
 			},
-			http.MethodGet)
+			http.MethodGet,
+		)
 		logs.Info("main: documentation enabled")
 	} else {
 		logs.Info("main: documentation disabled")

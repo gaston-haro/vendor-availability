@@ -4,7 +4,7 @@
   </a>
   <br>
   <br>
-  @project_name@
+  vendor-availability
   <br>
 </h1>
 <h4 align="center">Add a description here about your project, explain very briefly what it does.</h4>

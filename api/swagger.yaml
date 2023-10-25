@@ -1,11 +1,11 @@
 swagger: "2.0"
 info:
-  description: "@project_name@ interface spec"
+  description: "vendor-availability interface spec"
   version: "1.0.0"
-  title: "@project_name@"
+  title: "vendor-availability"
   contact:
     email: "apiteam@swagger.io"
-host: localhost:@service-port@
+host: localhost:8080
 basePath: "/"
 tags:
 - name: "root"

@@ -1,4 +1,4 @@
-module github.com/pedidosya/@project_name@
+module github.com/pedidosya/vendor-availability
 
 go 1.17
 

@@ -3,15 +3,17 @@ package engine
 import (
 	"testing"
 
-	"github.com/pedidosya/@project_name@/models"
+	"github.com/pedidosya/vendor-availability/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetInfo(t *testing.T) {
-	e, err := New(&models.Config{
-		Version: "test version",
-		Env:     "test env",
-	})
+	e, err := New(
+		&models.Config{
+			Version: "test version",
+			Env:     "test env",
+		},
+	)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "test version", e.GetInfo()["version"])
@@ -19,10 +21,12 @@ func TestGetInfo(t *testing.T) {
 }
 
 func TestHello(t *testing.T) {
-	e, err := New(&models.Config{
-		Version: "test version",
-		Env:     "test env",
-	})
+	e, err := New(
+		&models.Config{
+			Version: "test version",
+			Env:     "test env",
+		},
+	)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "Hi john, how are you?", e.SayHi("john"))

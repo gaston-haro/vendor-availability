@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/pedidosya/@project_name@/models"
 	"github.com/pedidosya/peya-go/server"
+	"github.com/pedidosya/vendor-availability/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,6 +24,6 @@ func TestHealth(t *testing.T) {
 	s.ServeHTTP(rr, req)
 
 	// Assert response based on mocked engine behaviour
-	expected := `{"name":"@project_name@","info":{"hello":"world"}}`
+	expected := `{"name":"vendor-availability","info":{"hello":"world"}}`
 	assert.JSONEq(t, expected, rr.Body.String())
 }
