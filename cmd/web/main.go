@@ -60,7 +60,8 @@ func readConfig(env string) (*models.Config, error) {
 	cfg.Env = env
 	cfg.Version = os.Getenv("VERSION")
 
-	vaultValues, err := vault.Read("https://vault.peya.co/v1/secret/vendor-availability", env)
+	// TODO: change me once project is created in Jarvis
+	vaultValues, err := vault.Read("https://vault.peya.co/v1/secret/delivery-offer-service", env)
 	if err != nil {
 		panic(fmt.Sprintf("main: error from fault. no vault values found for env %s | %s", env, err.Error()))
 	}
