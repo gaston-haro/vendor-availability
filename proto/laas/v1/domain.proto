@@ -1,0 +1,98 @@
+// Definitions of all message types that are shared across public and private messages.
+
+syntax = "proto3";
+
+package laas.v1;
+
+option go_package = "github.com/deliveryhero/logistics-customer/laas/v1";
+option java_multiple_files = true;
+option java_outer_classname = "DomainProto";
+option java_package = "com.deliveryhero.logistics.customer.laas.v1";
+
+// Schedule based vendor availability.
+enum VendorScheduleStatus {
+  VENDOR_SCHEDULE_STATUS_INVALID = 0;
+  VENDOR_SCHEDULE_STATUS_OPEN = 1;
+  VENDOR_SCHEDULE_STATUS_CLOSED = 2;
+  //deprecated, will be removed at 2022-09-01
+  VENDOR_SCHEDULE_STATUS_OFFLINE = 3 [deprecated = true];
+  // A vendor is considered to have a schedule only if they have at least 1 regular or special day opening time range for delivery.
+  VENDOR_SCHEDULE_STATUS_SCHEDULE_NOT_FOUND = 4;
+  VENDOR_SCHEDULE_STATUS_SKIPPED = 5;
+}
+
+// Geo-constraints driven vendor availability.
+enum VendorGeoStatus {
+  VENDOR_GEO_STATUS_INVALID = 0;
+  VENDOR_GEO_STATUS_AVAILABLE = 1;
+  VENDOR_GEO_STATUS_UNDER_LOCKDOWN = 2;
+}
+
+// Status type for a shrinking cut polygon.
+enum ShrinkingCutPolygonStatus {
+  SHRINKING_CUT_POLYGON_STATUS_INVALID = 0;
+  SHRINKING_CUT_POLYGON_STATUS_OPEN = 1;
+  SHRINKING_CUT_POLYGON_STATUS_BUSY = 2;
+}
+
+// Fallback delivery fee as configured in DAS.
+message FallbackPricingResponse {
+  double delivery_fee = 1;
+  double minimum_order_value = 2;
+}
+
+// Fallback delivery time estimate as configured in DAS.
+message FallbackTimeEstimateResponse {
+  double delivery_time = 1;
+}
+
+// Message with locale being obtained from the delivery area stream.
+message LocalizedMessage {
+  string locale = 1;
+  string message = 2;
+}
+
+// Different Type of Vendor Actions.
+enum EventAction {
+  EVENT_ACTION_INVALID = 0;
+  EVENT_ACTION_CLOSED = 1;
+  EVENT_ACTION_LOCKDOWN = 2;
+  EVENT_ACTION_SHRINKING = 3;
+  EVENT_ACTION_DELAY = 4;
+}
+
+// Days of week for Vendor Schedules.
+enum DayOfWeek {
+  DAY_OF_WEEK_INVALID = 0;
+  DAY_OF_WEEK_MONDAY = 1;
+  DAY_OF_WEEK_TUESDAY = 2;
+  DAY_OF_WEEK_WEDNESDAY = 3;
+  DAY_OF_WEEK_THURSDAY = 4;
+  DAY_OF_WEEK_FRIDAY = 5;
+  DAY_OF_WEEK_SATURDAY = 6;
+  DAY_OF_WEEK_SUNDAY = 7;
+}
+
+// The reasons which affect vendors visibility on the RLP.
+enum SpecialOfflineReason {
+  SPECIAL_OFFLINE_REASON_INVALID = 0;
+  SPECIAL_OFFLINE_REASON_RESTRICTED_VISIBILITY = 1;
+}
+
+// Offline status of the vendor.
+enum OfflineStatus {
+  OFFLINE_STATUS_INVALID = 0;
+  OFFLINE_STATUS_UNAVAILABLE = 1;
+  OFFLINE_STATUS_AVAILABLE = 2;
+  OFFLINE_STATUS_SKIPPED = 3;
+}
+
+enum DeliveryMode {
+  // buf:lint:ignore ENUM_ZERO_VALUE_SUFFIX
+  // DELIVERY represents delivery types carried out by either vendor or platform.
+  // Delivery schedule is evaluated. This is the default mode. In this mode only vendors that support one of platform_delivery, vendor_delivery, partner_delivery are listed. (See also: VendorFilter.include_pickup_only_vendors)
+  DELIVERY_MODE_DELIVERY = 0;
+  // PICK-UP represents pick-up delivery. Vendor delivery areas and pick-up schedule
+  // are used to evaluate availability. In this mode vendors that support pickup delivery type are listed (i.e. vendors that don't support pickup are excluded).
+  DELIVERY_MODE_PICK_UP = 1;
+}

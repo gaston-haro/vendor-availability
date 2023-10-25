@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package dynamicpricing.v1;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/dynamicpricing/v1";
+option java_multiple_files = true;
+option java_outer_classname = "WorkspaceOptimizationProto";
+option java_package = "com.deliveryhero.logistics.customer.dynamicpricing.v1";
+
+// DPS order share based request optimization payload.
+message OrderShareOptimizationRequest {
+  // DPS order share input tiers.
+  message TravelTimeComponent {
+    repeated OrderShareTier order_share_tiers = 1 [(validate.rules).repeated.min_items = 1];
+  }
+  int64 optimization_id = 1 [(validate.rules).int64.gt = 0];
+  string global_entity_id = 2 [(validate.rules).string.pattern = "^[A-Z]{2,3}_[A-Z]{2}$"];
+  // Unique identifier of logistics environment, it is used to identify each different deployment of the same application.
+  // Eg: a4 and at points to the Austria environment but both addresses different use-cases in the same country.
+  string logistics_environment_id = 3 [(validate.rules).string.pattern = "^[a-z]{1,2}[0-9]{0,1}$"];
+  //Date must be in the format YYYY-MM-DD
+  string start_date = 4 [(validate.rules).string.pattern = "\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"];
+  //Date must be in the format YYYY-MM-DD
+  string end_date = 5 [(validate.rules).string.pattern = "\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"];
+  repeated string vendor_ids = 6 [(validate.rules).repeated.min_items = 1];
+  TravelTimeComponent travel_time_component = 7 [(validate.rules).message.required = true];
+}
+
+// DPS order share tier.
+message OrderShareTier {
+  int32 cumulative_order_share = 1 [
+    (validate.rules).int32.gt = 0,
+    (validate.rules).int32.lte = 100
+  ];
+  double cumulative_order_share_double = 2 [
+    (validate.rules).double.gte = 0,
+    (validate.rules).double.lte = 100,
+    deprecated = true
+  ];
+}
+
+// DPS order share based response optimization payload.
+message OrderShareOptimizationResponse {
+  int64 optimization_id = 1 [(validate.rules).int64.gt = 0];
+  string global_entity_id = 2 [(validate.rules).string.pattern = "^[A-Z]{2,3}_[A-Z]{2}$"];
+  // Unique identifier of logistics environment, it is used to identify each different deployment of the same application.
+  // Eg: a4 and at points to the Austria environment but both addresses different use-cases in the same country.
+  string logistics_environment_id = 3 [(validate.rules).string.pattern = "^[a-z]{1,2}[0-9]{0,1}$"];
+  OptimizationStatus status = 4 [(validate.rules).message.required = true];
+  TravelTimeComponent travel_time_component = 5;
+}
+
+// DPS order share based optimized travel time configuration.
+message OptimizationStatus {
+  StatusCode code = 1;
+  string message = 2;
+}
+
+// Possible status codes for the optimization response.
+enum StatusCode {
+  STATUS_CODE_INVALID = 0;
+  STATUS_CODE_SUCCESS = 1;
+  STATUS_CODE_ERROR_UNKNOWN = 2;
+  STATUS_CODE_ERROR_NOT_ENOUGH_ORDERS = 3;
+  STATUS_CODE_ERROR_INVALID_PAYLOAD = 4;
+  STATUS_CODE_ERROR_BQ_EXCEPTION = 5;
+  STATUS_CODE_ERROR_TIME_OUT = 6;
+  STATUS_CODE_ERROR_NO_DATA_IN_TABLE = 7;
+  STATUS_CODE_ERROR_BQ_NOT_SYNCHRONIZED = 8;
+}
+
+// DPS order share based optimized travel time configuration.
+message TravelTimeComponent {
+  repeated TravelTimeTier travel_time_tiers = 1;
+}
+
+// DPS order share based optimized travel time tier.
+message TravelTimeTier {
+  int32 travel_time_threshold_seconds = 1;
+}

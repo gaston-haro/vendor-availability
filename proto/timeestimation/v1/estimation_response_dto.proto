@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package timeestimation.v1;
+
+import "domain/v1/time.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/timeestimation/v1";
+option java_multiple_files = true;
+option java_outer_classname = "EstimationResponseDtoProto";
+option java_package = "com.deliveryhero.logistics.customer.timeestimation.v1";
+
+// Time Estimation Response for a vendor.
+message SingleVendorTimeEstimation {
+  string vendor_id = 1;
+  domain.v1.UnixTimeMillis delivery_time = 2;
+  domain.v1.Duration delivery_duration = 3;
+  domain.v1.Duration preparation_duration = 4;
+  domain.v1.Duration preparation_buffer_duration = 5;
+  domain.v1.Duration order_delay_duration = 6;
+  domain.v1.Duration driving_duration = 7;
+}
+
+// Time Estimation Response for a vendor in case of multi-estimation call.
+message MultiVendorTimeEstimation {
+  string vendor_id = 1;
+  domain.v1.Duration delivery_duration = 2;
+}

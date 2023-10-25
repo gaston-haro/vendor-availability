@@ -1,0 +1,145 @@
+// Definitions of all message used in the private API and internal communication.
+
+syntax = "proto3";
+
+package laas.v1;
+
+import "deliveryareas/v1/domain.proto";
+import "domain/v1/geo.proto";
+import "domain/v1/metadata.proto";
+import "domain/v1/time.proto";
+import "domain/v1/vendor.proto";
+import "google/protobuf/wrappers.proto";
+import "laas/v1/domain.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/laas/v1";
+option java_multiple_files = true;
+option java_outer_classname = "EventProto";
+option java_package = "com.deliveryhero.logistics.customer.laas.v1";
+
+// Aggregated vendor representation.
+message SummarizedVendor {
+  // Required fields
+  string vendor_id = 1;
+  string global_entity_id = 2;
+  string name = 3;
+  bool test_vendor = 4;
+  repeated domain.v1.DeliveryType delivery_types = 5;
+  laas.v1.VendorGeoStatus geo_status = 6;
+  domain.v1.Coordinate location = 7;
+  bool active = 8;
+  repeated domain.v1.CustomerType customer_types = 9;
+  repeated VendorFilterAttribute filter_attributes = 10;
+  VendorSchedule vendor_schedule = 11;
+  VendorUnavailability vendor_unavailability = 12;
+  bool private = 13;
+  //for future required fields
+  reserved 14 to 29;
+  // Optional fields
+  google.protobuf.StringValue vertical_type = 30;
+  google.protobuf.StringValue vertical_parent = 31;
+  repeated string tags = 32;
+  google.protobuf.BoolValue key_account = 33;
+  google.protobuf.BoolValue contracted = 34;
+  google.protobuf.BoolValue halal = 35;
+  google.protobuf.BoolValue allow_preorder = 36;
+  google.protobuf.StringValue applied_delivery_area_event_id = 37;
+  // list of vendor's nextAvailableAt timestamps in chronological order
+  repeated domain.v1.UnixTimeMillis next_available_at_list = 38;
+  repeated string vertical_type_ids = 39;
+  domain.v1.UnixTimeMillis next_available_at_list_updated_at = 40;
+  // list of vendor's nextClosedAt timestamps in chronological order
+  repeated domain.v1.UnixTimeMillis next_closed_at_list = 41;
+  domain.v1.Metadata metadata = 42;
+}
+
+// Vendor attributes used to filter filters with.
+message VendorFilterAttribute {
+  deliveryareas.v1.VendorFilterField field = 1;
+  repeated string values = 2;
+}
+
+// Aggregated Vendor Delivery Area representation.
+message SummarizedVendorGeoData {
+  string vendor_id = 1;
+  string global_entity_id = 2;
+  repeated ShrinkingCutPolygon shrinking_cut_polygons = 3;
+  domain.v1.Metadata metadata = 4;
+}
+
+// Shrinking Cut Polygon representation.
+message ShrinkingCutPolygon {
+  string id = 1;
+  FallbackPricingResponse pricing_response = 2;
+  FallbackTimeEstimateResponse time_estimate_response = 3;
+  repeated string shrinking_tags = 4;
+  laas.v1.ShrinkingCutPolygonStatus status = 5;
+  bytes polygon_wkb = 6;
+}
+
+// Summarized data for delivery area event.
+message SummarizedDeliveryAreaEvent {
+  string global_entity_id = 1;
+  string event_id = 2;
+  EventAction event_action = 3;
+  bytes polygon_wkb = 4;
+  bool active = 5;
+  google.protobuf.DoubleValue shrinking_value = 6;
+  repeated LocalizedMessage messages = 7;
+  deliveryareas.v1.VendorFilters vendor_filters = 8;
+  domain.v1.Metadata metadata = 9;
+}
+
+// Schedule data for summarized vendors.
+message VendorSchedule {
+  // Using IANA-hosted time zone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+  string timezone = 1;
+  // Delivery schedule
+  repeated Schedule schedules = 2;
+  // Delivery special days
+  repeated SpecialDay special_days = 3;
+  repeated Schedule pickup_schedules = 4;
+  repeated SpecialDay pickup_special_days = 5;
+  domain.v1.Metadata metadata = 6;
+}
+
+// Weekly schedule of vendor.
+message Schedule {
+  laas.v1.DayOfWeek day = 1;
+  repeated TimeRange time_ranges = 2;
+}
+
+// Special days of vendor.
+message SpecialDay {
+  // Date format is YYYY-MM-dd like 2010-02-18.
+  string date = 1;
+  repeated TimeRange time_ranges = 2;
+}
+
+// Time range for schedule and special_days.
+message TimeRange {
+  // "from" format is HH:mm, 00:00 <= from <= 23:59.
+  string from = 1;
+  // "to" format is HH:mm, 00:01 <= to <= 24:00.
+  string to = 2;
+}
+
+// Top-level message to abstract the list of Offline Schedules.
+message VendorUnavailability {
+  repeated OfflineSchedule offline_schedules = 1;
+  domain.v1.Metadata metadata = 2;
+}
+
+// Offline reason for a vendor with a specified start and end date.
+message OfflineSchedule {
+  // start_date expressed as UTC ISO-8601 like "2010-02-18T06:22:33.442Z"
+  // https://en.wikipedia.org/wiki/ISO_8601
+  string start_date = 1;
+  // end_date expressed as UTC ISO-8601 like "2010-02-18T06:22:33.442Z"
+  // https://en.wikipedia.org/wiki/ISO_8601
+  google.protobuf.StringValue end_date = 2;
+  oneof offline_reason {
+    laas.v1.SpecialOfflineReason special_offline_reason = 3;
+    string unavailability_reason = 4;
+  }
+}

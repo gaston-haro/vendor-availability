@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package domain.v1;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/domain/v1";
+option java_multiple_files = true;
+option java_outer_classname = "IdentifierProto";
+option java_package = "com.deliveryhero.logistics.customer.domain.v1";
+
+// Source system that generated the identifier.
+enum IdentifierSource {
+  IDENTIFIER_SOURCE_INVALID = 0;
+  IDENTIFIER_SOURCE_PERSEUS = 1;
+  IDENTIFIER_SOURCE_CUSTOM = 2;
+}
+
+// Unique id for a user's device. Deprecated - use ClientId instead.
+message UserId {
+  option deprecated = true;
+  IdentifierSource source = 1;
+  string id = 2 [(validate.rules).string.min_len = 1];
+}
+
+// Unique id for a user session.
+message SessionId {
+  IdentifierSource source = 1;
+  string id = 2 [(validate.rules).string.min_len = 1];
+}
+
+// Unique id for a customer/user's device.
+message ClientId {
+  IdentifierSource source = 1;
+  string id = 2 [(validate.rules).string.min_len = 1];
+}

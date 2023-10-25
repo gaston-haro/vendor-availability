@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package dynamicpricing.v1;
+
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/dynamicpricing/v1";
+option java_multiple_files = true;
+option java_outer_classname = "ResponseDtoProto";
+option java_package = "com.deliveryhero.logistics.customer.dynamicpricing.v1";
+
+// Fee information for a vendor. Check https://apidocs.usehurrier.com/logistics-dynamic-pricing.html#delivery-fee-v2-get-single-fee-v2-post for more details
+message VendorFee {
+  string vendor_id = 1;
+  // Currency code expressed as ISO-4217 alpha representation
+  // https://en.wikipedia.org/wiki/ISO_4217
+  string currency = 2;
+  DeliveryFee delivery_fee = 3;
+  // Minimum order value so the order is accepted by the vendor.
+  MinimumOrderValue minimum_order_value = 4;
+  // Service Fee as per the order.
+  ServiceFee service_fee = 5;
+  repeated FeeReason fee_reason = 6;
+  MetaData metadata = 7;
+  repeated PriorityFee priority_fee = 8;
+}
+
+// Breakdown of the delivery fee.
+message DeliveryFee {
+  // The actual total delivery fee.
+  double total = 1;
+  double travel_time = 2;
+  double fleet_utilization = 3;
+  BasketValueFee basket_value_fee = 4;
+  MinimumDeliveryFee minimum_delivery_fee = 5;
+  // Contains the ‘total’ delivery fee based on the unconditional “fallback” condition of an assignment, and only considers the base component configuration.
+  // Present only if the actual delivery fee is based on a conditional setup and is lower than the standard fee.
+  StandardFee standard_fee = 6;
+}
+
+// Information about the basket value fee component.
+message BasketValueFee {
+  // The delivery fee value users have to pay at the current value of their basket (can be used to show how much customers "saved")
+  double current_fee_value = 1;
+  // The delivery fee value users have to pay at the next higher basket value they can reach.
+  google.protobuf.DoubleValue next_fee_value = 2;
+  // The basket value which users on client-side have to reach to have the next lower fee value applied.
+  google.protobuf.DoubleValue next_threshold = 3;
+  // The difference off current basket value and basket value that users need to reach to have a lower delivery applied (i. e. the additional value users need to add to the basket).
+  google.protobuf.DoubleValue difference_threshold = 4;
+}
+
+// Information about the minimum delivery fee component.
+message MinimumDeliveryFee {
+  MinimumDeliveryFeeType type = 1;
+  // Its the order value that needs to be reached for the lowest possible delivery fee.
+  google.protobuf.DoubleValue basket_value_threshold = 2;
+  // The value of the lowest possible delivery fee (present only if the type is best_deal).
+  google.protobuf.DoubleValue delivery_fee_total = 3;
+  // The value of the highest possible discount (present only if the type is best_deal).
+  google.protobuf.DoubleValue discount = 4;
+}
+
+// Information about the standard fee component.
+message StandardFee {
+  double total = 1;
+}
+
+// Possible types for the minimum delivery fee.
+enum MinimumDeliveryFeeType {
+  MINIMUM_DELIVERY_FEE_TYPE_INVALID = 0;
+  MINIMUM_DELIVERY_FEE_TYPE_FREE_DELIVERY = 1;
+  MINIMUM_DELIVERY_FEE_TYPE_BEST_DEAL = 2;
+}
+
+// Minimum order value so the order is accepted by the vendor.
+message MinimumOrderValue {
+  // The total minimum order value, it is based on the travel time in case the component has flat MOV or travel time MOV only, it is based on the fleet delay otherwise.
+  double total = 1;
+  // The minimum order value based on the travel time.
+  double travel_time = 2;
+  // The difference between the total and the travel_time
+  double fleet_utilization = 3;
+  // small order fee limit information
+  SmallOrderFee small_order_fee = 4;
+}
+
+// Small order fee limit information.
+message SmallOrderFee {
+  // The hard minimum order value limit.
+  double hard_limit = 1;
+  // The soft minimum order value limit.
+  double soft_limit = 2;
+  // The maximum possible small order fee surcharge.
+  double small_order_fee_cap = 3;
+  // The small order fee value.
+  double small_order_fee = 4;
+}
+
+// Service Fee as per the order.
+message ServiceFee {
+  // A fee for diverse services that customers are charged instead or on top of delivery fee
+  double total = 1;
+  // Service fee value that total ServiceFee is calculated based on it
+  double setup_value = 2;
+  // Service fee type that total ServiceFee is calculated based on it
+  ServiceFeeType type = 3;
+  double min_value = 4;
+  double max_value = 5;
+}
+
+// Possible types for the service fee.
+enum ServiceFeeType {
+  SERVICE_FEE_TYPE_INVALID = 0;
+  SERVICE_FEE_TYPE_ABSOLUTE = 1;
+  SERVICE_FEE_TYPE_PERCENTAGE = 2;
+}
+
+// Possible reasons for the fee.
+message FeeReason {
+  FeeReasonType fee_reason_type = 1;
+  bool reason_applied = 2;
+}
+
+// Possible types for the fee reason.
+enum FeeReasonType {
+  FEE_REASON_TYPE_INVALID = 0;
+  FEE_REASON_TYPE_NEW_CUSTOMER = 1;
+  FEE_REASON_TYPE_SUBSCRIBER = 2;
+}
+
+// Information about the customer.
+message Customer {
+  string subscription_id = 1;
+}
+
+// Contains information about which scheme is used to calculate the delivery fee.
+message MetaData {
+  int64 vendor_group_id = 1;
+  int64 scheme_id = 2;
+  string vendor_price_scheme_type = 3;
+  // pricing:automatic-assignment:<vendor_group_price_config_id> for ASA with new customer condition.
+  string incentive_id = 4;
+  // In case the delivery fee is subject to an incentive, the difference between the current total delivery fee minus.
+  // the original total delivery fee ignoring the incentive(s) and including all price components.
+  // A negative value represents an actual discount, and it will be null if there is no incentive.
+  double incentive_discount = 5;
+}
+
+message PriorityFee {
+  double value = 1;
+  PriorityFeeType type = 2;
+}
+
+enum PriorityFeeType {
+  PRIORITY_FEE_TYPE_INVALID = 0;
+  PRIORITY_FEE_TYPE_SURCHARGE = 1;
+}

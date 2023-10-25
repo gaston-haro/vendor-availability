@@ -1,0 +1,42 @@
+// Definitions of all message used only in the availability fallback
+
+syntax = "proto3";
+
+package laas.v1;
+
+import "domain/v1/geo.proto";
+import "domain/v1/vendor.proto";
+import "google/protobuf/wrappers.proto";
+import "laas/v1/domain.proto";
+import "laas/v1/event.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/laas/v1";
+option java_multiple_files = true;
+option java_outer_classname = "FallbackProto";
+option java_package = "com.deliveryhero.logistics.customer.laas.v1";
+
+// Snapshot vendor representation.
+message SnapshotVendor {
+  string global_entity_id = 1;
+  string vendor_id = 2;
+  repeated domain.v1.CustomerType customer_types = 3;
+  google.protobuf.StringValue vertical_type = 4;
+  google.protobuf.StringValue vertical_parent = 5;
+  repeated domain.v1.DeliveryType delivery_types = 6;
+  repeated laas.v1.VendorFilterAttribute filter_attributes = 7;
+  laas.v1.VendorSchedule vendor_schedule = 8;
+  google.protobuf.BoolValue private = 9;
+  google.protobuf.BoolValue test_vendor = 10;
+  google.protobuf.BoolValue allow_preorder = 11;
+  repeated string vertical_type_ids = 12;
+  FallbackPricingResponse pricing_response = 13;
+  FallbackTimeEstimateResponse time_estimate_response = 14;
+  repeated uint64 cell_ids = 15;
+  domain.v1.Coordinate location = 16;
+}
+
+message SnapshotIndex {
+  string global_entity_id = 1;
+  uint64 cell_id = 2;
+  repeated SnapshotVendor snapshot_vendors = 3;
+}

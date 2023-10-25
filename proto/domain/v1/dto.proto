@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package domain.v1;
+
+import "domain/v1/geo.proto";
+import "domain/v1/identifier.proto";
+import "domain/v1/time.proto";
+import "domain/v1/vendor.proto";
+import "google/protobuf/wrappers.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/domain/v1";
+option java_multiple_files = true;
+option java_outer_classname = "DtoProto";
+option java_package = "com.deliveryhero.logistics.customer.domain.v1";
+
+// Customer-specific information requested in each API call.
+message Customer {
+  // DEPRECATED - see client_id
+  UserId user_id = 1 [deprecated = true];
+  // Client/Device Id. Preferably it should be a Perseus client id.
+  ClientId client_id = 7;
+  // It should be the Perseus session id.
+  SessionId session_id = 2;
+  domain.v1.UnixTimeMillis session_timestamp = 3;
+  domain.v1.Coordinate location = 4 [(validate.rules).message.required = true];
+  // Platform's Customer Id
+  google.protobuf.StringValue customer_id = 5 [(validate.rules).string.min_len = 1];
+  // Indicates if the customer should be treated as a subscriber
+  bool treat_as_subscriber = 6;
+}
+
+// Information about the current state of the customer's order.
+message Order {
+  // Currency code expressed as ISO-4217 alpha representation
+  // https://en.wikipedia.org/wiki/ISO_4217
+  string currency = 1 [(validate.rules).string.pattern = "^[A-Z]{3}$"];
+  // Represents the cart total. In case when cart is empty, 0 value should be passed.
+  google.protobuf.DoubleValue basket_value = 2 [
+    (validate.rules).double.gte = 0,
+    (validate.rules).message.required = false
+  ];
+  repeated Product products = 3;
+  DeliveryType delivery_type = 4;
+  domain.v1.UnixTimeMillis promised_delivery_time = 5;
+}
+
+// Information about vendor whose information is requested.
+message Vendor {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  domain.v1.Coordinate location = 2 [(validate.rules).message.required = false];
+}
+
+// Represents a Product in the basket.
+message Product {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  int32 quantity = 2 [(validate.rules).int32.gt = 0];
+}

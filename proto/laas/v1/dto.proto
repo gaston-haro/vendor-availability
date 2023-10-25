@@ -1,0 +1,91 @@
+// Definitions of all message types that appear in LaaS public API _only_.
+
+syntax = "proto3";
+
+package laas.v1;
+
+import "domain/v1/vendor.proto";
+import "dynamicpricing/v1/public_api.proto";
+import "google/protobuf/wrappers.proto";
+import "laas/v1/domain.proto";
+import "timeestimation/v1/estimation_api.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/deliveryhero/logistics-customer/laas/v1";
+option java_multiple_files = true;
+option java_outer_classname = "DtoProto";
+option java_package = "com.deliveryhero.logistics.customer.laas.v1";
+
+// Supported vendor filtering options.
+message VendorFilter {
+  domain.v1.CustomerType customer_type = 1;
+  google.protobuf.StringValue vertical_parent = 2 [(validate.rules).string.min_len = 1];
+  // Primary vertical type of a vendor.
+  google.protobuf.StringValue vertical_type = 3 [(validate.rules).string.min_len = 1];
+  // A vendor is considered private if an Unavailability message with reason RESTRICTED_VISIBILITY is active for them (https://docs.api.thedatafridge.com/#tag/vendor-events/operation/VendorAvailability).
+  google.protobuf.BoolValue exclude_private_vendors = 4;
+  // A vendor is considered to have a schedule only if they have at least 1 regular or special day opening time range for delivery.
+  google.protobuf.BoolValue exclude_vendors_without_schedule = 5;
+  // If this parameter is true, the vendors which are currently closed, will only be returned if their allow_preorder property is true.
+  google.protobuf.BoolValue exclude_closed_non_preorder_vendors = 6;
+  // All vertical types supported by the vendor.
+  repeated string vertical_type_ids = 7 [(validate.rules).repeated.items.string.min_len = 1];
+  // In default mode false only vendors that support one of platform_delivery, vendor_delivery, partner_delivery are listed, excluding "pickup only" vendors. Setting this value to true includes pickup-only vendors (use-case for LatAm).
+  google.protobuf.BoolValue include_pickup_only_vendors = 8;
+  google.protobuf.StringValue chain_id = 9 [(validate.rules).string.min_len = 1];
+  google.protobuf.BoolValue enable_chain_deduplication = 10;
+  repeated string exclude_vertical_types = 11 [(validate.rules).repeated.items.string.min_len = 1];
+}
+
+// Aggregate information returned for a single vendor by LaaS API.
+message Vendor {
+  string vendor_id = 1;
+  laas.v1.VendorScheduleStatus schedule_status = 2;
+  laas.v1.CustomerVendorGeoStatus geo_status = 3;
+  laas.v1.OfflineStatus offline_status = 4;
+  //maps to OfflineReason in vendor-availability stream
+  string offline_reason = 5;
+  oneof delivery_fee {
+    laas.v1.FallbackPricingResponse fallback_pricing_response = 6;
+    dynamicpricing.v1.GetSingleVendorFeeResponse dps_response = 7;
+  }
+  oneof delivery_time_estimate {
+    laas.v1.FallbackTimeEstimateResponse fallback_time_estimate_response = 8;
+    timeestimation.v1.SingleVendorEstimationResponse tes_response = 9;
+  }
+  google.protobuf.StringValue applied_delivery_area_event_id = 10;
+  // If the vendor is currently closed and becomes available according the vendor-schedule and vendor-availability streams within the next 4 days,
+  // this field returns that absolute point in time, stating the vendor's UTC offset as per RFC-3339.
+  google.protobuf.StringValue available_at_in_vendor_local_time = 11;
+  // If the vendor is currently open and closes or becomes unavailable according the vendor-schedule and vendor-availability streams within the next 4 days,
+  // this field returns that absolute point in time, stating the vendor's UTC offset as per RFC-3339.
+  google.protobuf.StringValue closed_at_in_vendor_local_time = 12;
+  // Vendor distance in meter to the customer.
+  google.protobuf.Int32Value distance_meters = 13;
+}
+
+// Geo-constraints driven vendor availability.
+enum CustomerVendorGeoStatus {
+  CUSTOMER_VENDOR_GEO_STATUS_INVALID = 0;
+  CUSTOMER_VENDOR_GEO_STATUS_AVAILABLE = 1;
+  CUSTOMER_VENDOR_GEO_STATUS_OUTSIDE_DELIVERY_AREA = 2;
+  // Lockdown events are being applied to both customer and vendor locations, this is to block vendors from receiving orders.
+  // see https://product.deliveryhero.net/logistics-rider/documentation/event-actions-and-effects/ for detailed explanations.
+  CUSTOMER_VENDOR_GEO_STATUS_VENDOR_UNDER_LOCKDOWN = 3;
+  // Lockdown events are being applied to both customer and vendor locations, this is to block customers inside event zone from placing orders.
+  CUSTOMER_VENDOR_GEO_STATUS_CUSTOMER_UNDER_LOCKDOWN = 4;
+  // Shrinking events are being applied to customer locations but reduces the delivery areas of vendors for customers.
+  CUSTOMER_VENDOR_GEO_STATUS_VENDOR_UNDER_SHRINKING = 5;
+  // Close events are being applied to customer locations to block customers inside event zone from placing orders.
+  CUSTOMER_VENDOR_GEO_STATUS_CLOSED_FOR_CUSTOMER = 6;
+  CUSTOMER_VENDOR_GEO_STATUS_SKIPPED = 7;
+}
+
+// Delivery-area event information.
+message DeliveryAreaEvent {
+  string id = 1;
+  EventAction event_action = 2;
+  repeated LocalizedMessage messages = 3;
+  // Temporary added because of https://jira.deliveryhero.com/browse/LAAS-906
+  google.protobuf.DoubleValue action_value = 4;
+}
