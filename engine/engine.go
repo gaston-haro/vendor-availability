@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-
 	"github.com/pedidosya/vendor-availability/models"
 )
 
